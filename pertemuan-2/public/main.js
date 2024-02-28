@@ -8,12 +8,13 @@ if (!gl) {
 alert("Silahkan Klik OK");
 
 // atur ukuran canvas yang digunakan
-canvas.width = 300; // ini ukuran lebar dalam pixel
-canvas.height = 150; // ini ukuran tinggi dalam pixel
+canvas.width = 800; // ini ukuran lebar dalam pixel
+canvas.height = 800; // ini ukuran tinggi dalam pixel
 
 // bersihkan layer
 gl.clearColor(0, 0, 1, 1); // Updated alpha value to 1
 gl.clear(gl.COLOR_BUFFER_BIT);
+gl.viewport(0, 0, canvas.width, canvas.height);
 
 // membuat data titik untuk garis
 const points = [-0.5, 0.5, 0.5, -0.5, 0.5, 0.5];

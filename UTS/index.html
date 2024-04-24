@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dino Game</title>
+    <!-- Tautkan file style.css -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+
+    <!-- Pop-up "Mulai Permainan" -->
+    <div id="startGamePopup">
+      <h1>DINO GAME</h1>
+      <p>DON'T TOUCH THE RED RECTANGLE</p>
+      <button id="startGameButton">Start</button>
+    </div>
+
+    <!-- Pop-up "Mulai Ulang Permainan" -->
+    <div id="gameOverPopup" class="popup">
+      <div class="popup-content">
+        <h1>YOU LOSE</h1>
+        <p>YOU TOUCH THE RED RECTANGLE</p>
+        <button id="restartButtonInPopup">Restart</button>
+      </div>
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+</html>

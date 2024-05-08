@@ -66,7 +66,7 @@ gl.useProgram(shaderProgram);
 var rotationAngleClockwise = 0;
 var rotationAngleCounterClockwise = 0;
 
-function drawBlades(rotationAngle, centerX) {
+function drawBlades(rotationAngle, centerX, centerY) {
   // Jumlah bilah baling-baling
   var numBlades = 4;
   var angleIncrement = (2 * Math.PI) / numBlades;
@@ -75,7 +75,7 @@ function drawBlades(rotationAngle, centerX) {
     var angle = rotationAngle + i * angleIncrement;
 
     // Titik pusat baling-baling
-    var center = [centerX, 0.0]; // Mengatur pusat objek secara horizontal
+    var center = [centerX, centerY];
 
     // Titik-titik untuk segitiga
     var p1 = [
@@ -125,11 +125,17 @@ function animateBlades() {
   gl.clear(gl.COLOR_BUFFER_BIT);
   updateRotations();
 
-  // Menggambar objek yang berputar searah jarum jam di sebelah kiri
-  drawBlades(rotationAngleClockwise, -0.5);
+  // Menggambar objek yang berputar searah jarum jam di sebelah kiri atas
+  drawBlades(rotationAngleClockwise, -0.5, 0.5);
 
-  // Menggambar objek yang berputar berlawanan jarum jam di sebelah kanan
-  drawBlades(rotationAngleCounterClockwise, 0.55);
+  // Menggambar objek yang berputar berlawanan jarum jam di sebelah kanan atas
+  drawBlades(rotationAngleCounterClockwise, 0.55, 0.5);
+
+  // Menggambar objek yang berputar searah jarum jam di sebelah kiri bawah
+  drawBlades(rotationAngleClockwise, -0.5, -0.5);
+
+  // Menggambar objek yang berputar berlawanan jarum jam di sebelah kanan bawah
+  drawBlades(rotationAngleCounterClockwise, 0.55, -0.5);
 
   requestAnimationFrame(animateBlades);
 }

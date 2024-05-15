@@ -22,28 +22,28 @@ gl.clear(gl.COLOR_BUFFER_BIT);
 
 // Vertex shader source
 var vertexShaderSource = `
-    attribute vec2 a_position;
-    uniform float u_rotationAngle; // Menambahkan uniform untuk sudut rotasi
-    void main() {
-        // Membuat matriks rotasi
-        float c = cos(u_rotationAngle);
-        float s = sin(u_rotationAngle);
-        mat2 rotationMatrix = mat2(c, -s, s, c);
-        
-        // Mengalikan posisi dengan matriks rotasi
-        vec2 rotatedPosition = rotationMatrix * a_position;
-        
-        gl_Position = vec4(rotatedPosition, 0.0, 1.0);
-    }
-`;
+        attribute vec2 a_position;
+        uniform float u_rotationAngle;
+        uniform vec2 u_translation;
+        uniform float u_scale;
+        void main() {
+            float c = cos(u_rotationAngle);
+            float s = sin(u_rotationAngle);
+            mat2 rotationMatrix = mat2(c, -s, s, c);
+            vec2 scaledPosition = a_position * u_scale;
+            vec2 rotatedPosition = rotationMatrix * scaledPosition + u_translation;
+            gl_Position = vec4(rotatedPosition, 0.0, 1.0);
+        }
+    `;
 
 // Fragment shader source
 var fragmentShaderSource = `
-    precision mediump float; 
-    void main() { 
-        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-    }
-`;
+        precision mediump float;
+        uniform vec4 u_color;
+        void main() {
+            gl_FragColor = u_color;
+        }
+    `;
 
 // Buat vertex shader
 var vShader = gl.createShader(gl.VERTEX_SHADER);
@@ -62,82 +62,57 @@ gl.attachShader(shaderProgram, fShader);
 gl.linkProgram(shaderProgram);
 gl.useProgram(shaderProgram);
 
-// Variabel untuk menyimpan sudut rotasi
-var rotationAngleClockwise = 0;
-var rotationAngleCounterClockwise = 0;
+var positionLocation = gl.getAttribLocation(shaderProgram, "a_position");
+var colorLocation = gl.getUniformLocation(shaderProgram, "u_color");
+var rotationLocation = gl.getUniformLocation(shaderProgram, "u_rotationAngle");
+var translationLocation = gl.getUniformLocation(shaderProgram, "u_translation");
+var scaleLocation = gl.getUniformLocation(shaderProgram, "u_scale");
 
-function drawBlades(rotationAngle, centerX, centerY) {
-  // Jumlah bilah baling-baling
-  var numBlades = 4;
-  var angleIncrement = (2 * Math.PI) / numBlades;
+var vertices = new Float32Array([0, 0.1, -0.1, -0.1, 0.1, -0.1]);
 
-  for (var i = 0; i < numBlades; i++) {
-    var angle = rotationAngle + i * angleIncrement;
+var vBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+gl.enableVertexAttribArray(positionLocation);
+gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    // Titik pusat baling-baling
-    var center = [centerX, centerY];
-
-    // Titik-titik untuk segitiga
-    var p1 = [
-      Math.cos(angle) * 0.3 + center[0],
-      Math.sin(angle) * 0.3 + center[1],
-    ];
-    var p2 = [
-      Math.cos(angle + angleIncrement) * 0.3 + center[0],
-      Math.sin(angle + angleIncrement) * 0.3 + center[1],
-    ];
-    var p3 = [center[0], center[1]];
-
-    // Menggabungkan titik-titik untuk membentuk segitiga
-    var vertices = [
-      center[0],
-      center[1],
-      p1[0],
-      p1[1],
-      p2[0],
-      p2[1],
-      p3[0],
-      p3[1],
-    ];
-
-    // Buffer segitiga
-    var vBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
-    // Location
-    var positionLocation = gl.getAttribLocation(shaderProgram, "a_position");
-    gl.enableVertexAttribArray(positionLocation);
-
-    // Gambar segitiga.
-    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); // Menggunakan TRIANGLE_STRIP untuk menggambar segitiga
-  }
+function randomColor() {
+  return [Math.random(), Math.random(), Math.random(), 1.0];
 }
 
-function updateRotations() {
-  rotationAngleClockwise += 0.01; // Atur kecepatan rotasi searah jarum jam di sini
-  rotationAngleCounterClockwise -= 0.01; // Atur kecepatan rotasi berlawanan jarum jam di sini
+function drawTriangle(rotationAngle, translation, scale, color) {
+  gl.uniform1f(rotationLocation, rotationAngle);
+  gl.uniform2fv(translationLocation, translation);
+  gl.uniform1f(scaleLocation, scale);
+  gl.uniform4fv(colorLocation, color);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
-function animateBlades() {
+var solidColors = [
+  [0.0, 0.5, 1.0, 1.0], // Biru solid
+  [0.0, 1.0, 0.0, 1.0], // Hijau solid
+];
+
+var rotationAngle = 0;
+
+function animateTriangles() {
   gl.clear(gl.COLOR_BUFFER_BIT);
-  updateRotations();
 
-  // Menggambar objek yang berputar searah jarum jam di sebelah kiri atas
-  drawBlades(rotationAngleClockwise, -0.5, 0.5);
+  var colors = [randomColor(), randomColor(), solidColors[0], solidColors[1]];
+  var scale = 2; // Ubah ukuran segitiga di sini
 
-  // Menggambar objek yang berputar berlawanan jarum jam di sebelah kanan atas
-  drawBlades(rotationAngleCounterClockwise, 0.55, 0.5);
+  // Menggambar dua segitiga atas
+  drawTriangle(rotationAngle, [-0.7, 0.7], scale, colors[0]);
+  drawTriangle(rotationAngle, [0.7, 0.7], scale, colors[1]);
 
-  // Menggambar objek yang berputar searah jarum jam di sebelah kiri bawah
-  drawBlades(rotationAngleClockwise, -0.5, -0.5);
+  // Menggambar satu segitiga tengah
+  drawTriangle(rotationAngle, [0.0, 0.0], scale, colors[2]);
 
-  // Menggambar objek yang berputar berlawanan jarum jam di sebelah kanan bawah
-  drawBlades(rotationAngleCounterClockwise, 0.55, -0.5);
+  // Menggambar satu segitiga bawah
+  drawTriangle(rotationAngle, [0.0, -0.7], scale, colors[3]);
 
-  requestAnimationFrame(animateBlades);
+  rotationAngle += 0.01;
+  requestAnimationFrame(animateTriangles);
 }
 
-animateBlades();
+animateTriangles();

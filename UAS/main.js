@@ -1,19 +1,23 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+// Inisialisasi Bola
 const ballRadius = 10;
 let x = canvas.width / 2;
 let y = canvas.height - 30;
 let dx = 7;
 let dy = -7;
 
+// Inisialisasi Paddle
 const paddleHeight = 10;
 const paddleWidth = 150;
 let paddleX = (canvas.width - paddleWidth) / 2;
 
+// Inisialisasi tombol
 let rightPressed = false;
 let leftPressed = false;
 
+// Inisialisasi brick
 const brickRowCount = 8;
 const brickColumnCount = 11;
 const brickWidth = 75;
@@ -22,8 +26,10 @@ const brickPadding = 10;
 const brickOffsetTop = 30;
 const brickOffsetLeft = 30;
 
+// inisialisasi skor
 let score = 0;
 
+// inisialisasi array brick
 const bricks = [];
 for (let c = 0; c < brickColumnCount; c++) {
   bricks[c] = [];
@@ -32,6 +38,7 @@ for (let c = 0; c < brickColumnCount; c++) {
   }
 }
 
+// Event Listener untuk tombol
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 
@@ -51,6 +58,7 @@ function keyUpHandler(e) {
   }
 }
 
+// fungsi tabrakan antar bola dan brick
 function collisionDetection() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -75,6 +83,7 @@ function collisionDetection() {
   }
 }
 
+// fungsi gambar bola
 function drawBall() {
   ctx.beginPath();
   ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
@@ -83,6 +92,7 @@ function drawBall() {
   ctx.closePath();
 }
 
+// fungsi gambar paddle
 function drawPaddle() {
   ctx.beginPath();
   ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
@@ -91,6 +101,7 @@ function drawPaddle() {
   ctx.closePath();
 }
 
+// fungsi gambar brick
 function drawBricks() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -109,12 +120,14 @@ function drawBricks() {
   }
 }
 
+// fungsi gambar skor
 function drawScore() {
   ctx.font = "16px Arial";
   ctx.fillStyle = "#f0f0f0";
   ctx.fillText("Score: " + score, 8, 20);
 }
 
+// fungsi tampilan
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBricks();
@@ -123,6 +136,7 @@ function draw() {
   drawScore();
   collisionDetection();
 
+  // periksa bola dengan canvas dan paddle
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
     dx = -dx;
   }
@@ -132,13 +146,12 @@ function draw() {
     if (x > paddleX && x < paddleX + paddleWidth) {
       dy = -dy;
     } else {
-      var isGameOver = confirm("GAME OVER!");
-      if (isGameOver == true) {
-        window.location.reload();
-      }
+      alert("YOU LOSE!");
+      document.location.reload();
     }
   }
 
+  // paddle digerakan
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
     paddleX += 7;
   } else if (leftPressed && paddleX > 0) {
